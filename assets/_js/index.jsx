@@ -62,6 +62,12 @@ class NumField extends React.Component {
   }
 
   render() {
+    var msg = ''
+    if ( this.props.msg ) {
+      msg = (
+        <span className="error">{' ' + this.props.msg}</span>
+      )
+    }
     return (
       <p>
         <label htmlFor={this.props.varName}>{this.props.label}:</label>
@@ -71,6 +77,7 @@ class NumField extends React.Component {
           value={this.props.value}
           onChange={this.handleChange}
         />
+        {msg}
       </p>
     )
   }
@@ -93,7 +100,14 @@ class VarsForm extends React.Component {
           onChange={this.props.onYearlyContribChange}
         />
         <NumField
-          name="yearls"
+          name="growthRate"
+          label="Growth Rate"
+          value={this.props.growthRate}
+          onChange={this.props.onGrowthRateChange}
+          msg={this.props.growthRateMsg}
+        />
+        <NumField
+          name="years"
           label="Years"
           value={this.props.years}
           onChange={this.props.onYearsChange}
@@ -110,14 +124,16 @@ class ICalc extends React.Component {
 
     this.handleYearlyContribChange = this.handleYearlyContribChange.bind(this)
     this.handleYearsChange = this.handleYearsChange.bind(this)
+    this.handleGrowthRateChange = this.handleGrowthRateChange.bind(this)
 
     this.state = {
       startingTotal: 0.00,
       growthRate: 0.07,
+      grMsg: '',
       spendingRate: 0.035,
       inflationRate: 0.03,
       yearlyContrib: 30000.00,
-      years: 10
+      years: 20
     }
   }
 
@@ -146,6 +162,23 @@ class ICalc extends React.Component {
     })
   }
 
+  handleGrowthRateChange(rate) {
+    this.setState((prevState, props) => {
+      // Scrub the input
+      var badNum = false
+      if ( ! rate ) { badNum = true }
+      const fmtValue = Number(rate)
+      if (Number.isNaN(fmtValue)) { badNum = true }
+
+      if ( badNum ) {
+        return { growthRate: prevState.growthRate, grMsg: 'Please enter a number.' }
+      } else {
+        return { growthRate: rate, grMsg: '' }
+      }
+
+    })
+  }
+
   render() {
     var data = calcData(this.state)
     return (
@@ -155,6 +188,9 @@ class ICalc extends React.Component {
           onYearlyContribChange={this.handleYearlyContribChange}
           years={this.state.years}
           onYearsChange={this.handleYearsChange}
+          growthRate={this.state.growthRate}
+          onGrowthRateChange={this.handleGrowthRateChange}
+          growthRateMsg={this.state.grMsg}
         />
         <Table
           data={data}
