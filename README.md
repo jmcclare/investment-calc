@@ -27,7 +27,7 @@ cd investment-calc
 rm -rf .git
 ```
 
-Symlink the JSX and Stylus files into the main app’s `assets`.
+Symlink the JSX and Stylus directories into the main app’s `assets`.
 
 ```bash
 ln -s ../../site_modules/investment-calc/assets/_js ../../assets/_js/investment-calc
