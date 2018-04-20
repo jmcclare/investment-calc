@@ -16,7 +16,7 @@ var Row = function(props) {
   return (
     <tr>
       <td className="year">{props.item[0]}</td>
-      <td className="total">$ {(props.item[1]).toFixed(2)}</td>
+      <td className="total">$ {Number(props.item[1]).toFixed(2)}</td>
     </tr>
   )
 }
@@ -90,14 +90,21 @@ class VarsForm extends React.Component {
   }
 
   render() {
-    const handleYearlyContribChange = this.handleYearlyContribChange
     return (
       <form className="vars-form">
+        <NumField
+          name="startingTotal"
+          label="Starting Total"
+          value={this.props.startingTotal}
+          onChange={this.props.onStartingTotalChange}
+          msg={this.props.stMsg}
+        />
         <NumField
           name="yearlyContrib"
           label="Yearly Contribution"
           value={this.props.yearlyContrib}
           onChange={this.props.onYearlyContribChange}
+          msg={this.props.ycMsg}
         />
         <NumField
           name="growthRate"
@@ -122,29 +129,50 @@ class ICalc extends React.Component {
   constructor(props) {
     super(props)
 
+    this.handleStartingTotalChange = this.handleStartingTotalChange.bind(this)
     this.handleYearlyContribChange = this.handleYearlyContribChange.bind(this)
     this.handleYearsChange = this.handleYearsChange.bind(this)
     this.handleGrowthRateChange = this.handleGrowthRateChange.bind(this)
 
     this.state = {
       startingTotal: 0.00,
+      stMsg: '',
       growthRate: 0.07,
       grMsg: '',
       spendingRate: 0.035,
       inflationRate: 0.03,
       yearlyContrib: 30000.00,
+      ycMsg: '',
       years: 20
     }
+  }
+
+  handleStartingTotalChange(amount) {
+    this.setState((prevState, props) => {
+      // Scrub the input
+      var badNum = false
+      if ( ! amount ) { badNum = true }
+      if (Number.isNaN(Number(amount))) { badNum = true }
+
+      if ( badNum ) {
+        return { startingTotal: prevState.startingTotal, stMsg: 'Please enter a number.' }
+      } else {
+        return { startingTotal: amount, stMsg: '' }
+      }
+    })
   }
 
   handleYearlyContribChange(amount) {
     this.setState((prevState, props) => {
       // Scrub the input
-      const fmtValue = Number(amount)
-      if (Number.isNaN(fmtValue)) {
-        return { yearlyContrib: prevState.yearlyContrib }
+      var badNum = false
+      if ( ! amount ) { badNum = true }
+      if (Number.isNaN(Number(amount))) { badNum = true }
+
+      if ( badNum ) {
+        return { yearlyContrib: prevState.yearlyContrib, ycMsg: 'Please enter a number.' }
       } else {
-        return { yearlyContrib: fmtValue }
+        return { yearlyContrib: amount, ycMsg: '' }
       }
     })
   }
@@ -167,8 +195,7 @@ class ICalc extends React.Component {
       // Scrub the input
       var badNum = false
       if ( ! rate ) { badNum = true }
-      const fmtValue = Number(rate)
-      if (Number.isNaN(fmtValue)) { badNum = true }
+      if (Number.isNaN(Number(rate))) { badNum = true }
 
       if ( badNum ) {
         return { growthRate: prevState.growthRate, grMsg: 'Please enter a number.' }
@@ -184,7 +211,11 @@ class ICalc extends React.Component {
     return (
       <div className="icalc">
         <VarsForm
+          startingTotal={this.state.startingTotal}
+          stMsg={this.state.stMsg}
+          onStartingTotalChange={this.handleStartingTotalChange}
           yearlyContrib={this.state.yearlyContrib}
+          ycMsg={this.state.ycMsg}
           onYearlyContribChange={this.handleYearlyContribChange}
           years={this.state.years}
           onYearsChange={this.handleYearsChange}
@@ -204,11 +235,13 @@ class ICalc extends React.Component {
 var calcData = function(params) {
   var data = []
   var total = params.startingTotal
+  var yearlyContrib = Number(params.yearlyContrib)
   debug('in calcData, params.yearlyContrib: ' + params.yearlyContrib)
+  debug('in calcData, yearlyContrib: ' + yearlyContrib)
   debug('in calcData, params.years: ' + params.years)
   for (var i = 0; i <= params.years; i++) {
     data.push([i, total])
-    total = total * (1 + params.growthRate) + params.yearlyContrib
+    total = total * (1 + params.growthRate) + yearlyContrib
   }
   return data
 }
