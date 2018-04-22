@@ -2,11 +2,11 @@ import React from 'react'
 import ReactDOM from 'react-dom'
 
 
-var enableDebug
-enableDebug = true
+// Set this to true to enable debugging output.
+const enableDebug = true
 
-var debug = function(msg) {
-  if ( enableDebug == true ) {
+const debug = function(msg) {
+  if ( enableDebug === true ) {
     console.log(msg)
   }
 }
@@ -16,7 +16,7 @@ var Row = function(props) {
   return (
     <tr>
       <td className="year">{props.item[0]}</td>
-      <td className="total">$ {Number(props.item[1]).toFixed(2)}</td>
+      <td className="total">$ {commaFmt(props.item[1])}</td>
     </tr>
   )
 }
@@ -62,10 +62,10 @@ class NumField extends React.Component {
   }
 
   render() {
-    var msg = ''
-    if ( this.props.msg ) {
-      msg = (
-        <span className="error">{' ' + this.props.msg}</span>
+    var err = ''
+    if ( this.props.err ) {
+      err = (
+        <span className="error">{' ' + this.props.err}</span>
       )
     }
     return (
@@ -77,7 +77,7 @@ class NumField extends React.Component {
           value={this.props.value}
           onChange={this.handleChange}
         />
-        {msg}
+        {err}
       </p>
     )
   }
@@ -97,27 +97,28 @@ class VarsForm extends React.Component {
           label="Starting Total"
           value={this.props.startingTotal}
           onChange={this.props.onStartingTotalChange}
-          msg={this.props.stMsg}
+          err={this.props.stErr}
         />
         <NumField
           name="yearlyContrib"
           label="Yearly Contribution"
           value={this.props.yearlyContrib}
           onChange={this.props.onYearlyContribChange}
-          msg={this.props.ycMsg}
+          err={this.props.ycErr}
         />
         <NumField
           name="growthRate"
           label="Growth Rate"
           value={this.props.growthRate}
           onChange={this.props.onGrowthRateChange}
-          msg={this.props.growthRateMsg}
+          err={this.props.growthRateErr}
         />
         <NumField
           name="years"
           label="Years"
           value={this.props.years}
           onChange={this.props.onYearsChange}
+          err={this.props.yearsErr}
         />
       </form>
     )
@@ -136,72 +137,70 @@ class ICalc extends React.Component {
 
     this.state = {
       startingTotal: 0.00,
-      stMsg: '',
+      stErr: '',
       growthRate: 0.07,
-      grMsg: '',
+      grErr: '',
       spendingRate: 0.035,
       inflationRate: 0.03,
       yearlyContrib: 30000.00,
-      ycMsg: '',
-      years: 20
+      ycErr: '',
+      years: 20,
+      yearsErr: ''
     }
   }
 
-  handleStartingTotalChange(amount) {
+  handleStartingTotalChange(input) {
     this.setState((prevState, props) => {
-      // Scrub the input
-      var badNum = false
-      if ( ! amount ) { badNum = true }
-      if (Number.isNaN(Number(amount))) { badNum = true }
+      // Check the input
+      var err = ''
+      if ( ! input ) { err = 'Please enter a number.' }
+      if (Number.isNaN(Number(input))) { err = 'Please enter a number.' }
 
-      if ( badNum ) {
-        return { startingTotal: prevState.startingTotal, stMsg: 'Please enter a number.' }
-      } else {
-        return { startingTotal: amount, stMsg: '' }
-      }
+      return { startingTotal: input, stErr: err }
     })
   }
 
-  handleYearlyContribChange(amount) {
+  handleYearlyContribChange(input) {
     this.setState((prevState, props) => {
-      // Scrub the input
-      var badNum = false
-      if ( ! amount ) { badNum = true }
-      if (Number.isNaN(Number(amount))) { badNum = true }
+      // Check the input
+      var err = ''
+      if ( ! input ) { err = 'Please enter a number.' }
+      if (Number.isNaN(Number(input))) { err = 'Please enter a number.' }
 
-      if ( badNum ) {
-        return { yearlyContrib: prevState.yearlyContrib, ycMsg: 'Please enter a number.' }
-      } else {
-        return { yearlyContrib: amount, ycMsg: '' }
-      }
+      return { yearlyContrib: input, ycErr: err }
     })
   }
 
-  handleYearsChange(number) {
+  handleYearsChange(input) {
     this.setState((prevState, props) => {
-      // Scrub the input
-      const fmtValue = Number(number).toFixed(0)
-      debug('in handleYearsChange, fmtValue: ' + fmtValue)
-      if (Number.isNaN(fmtValue)) {
-        return { years: prevState.years }
-      } else {
-        return { years: fmtValue }
-      }
+      // Check the input
+      var err = ''
+      if ( ! input ) { err = 'Please enter a number.' }
+      if (Number.isNaN(Number(input))) { err = 'Please enter a number.' }
+
+      return { years: input, yearsErr: err }
     })
   }
 
-  handleGrowthRateChange(rate) {
+  handleGrowthRateChange(input) {
     this.setState((prevState, props) => {
       // Scrub the input
-      var badNum = false
-      if ( ! rate ) { badNum = true }
-      if (Number.isNaN(Number(rate))) { badNum = true }
+      //var badNum = false
+      //if ( ! rate ) { badNum = true }
+      //if (Number.isNaN(Number(rate))) { badNum = true }
 
-      if ( badNum ) {
-        return { growthRate: prevState.growthRate, grMsg: 'Please enter a number.' }
-      } else {
-        return { growthRate: rate, grMsg: '' }
-      }
+      //if ( badNum ) {
+        //return { growthRate: prevState.growthRate, grErr: 'Please enter a number.' }
+      //} else {
+        //return { growthRate: rate, grErr: '' }
+      //}
+
+      // Check the input
+      var err = ''
+      if ( ! input ) { err = 'Please enter a number.' }
+      if (Number.isNaN(Number(input))) { err = 'Please enter a number.' }
+
+      return { growthRate: input, grErr: err }
 
     })
   }
@@ -212,16 +211,17 @@ class ICalc extends React.Component {
       <div className="icalc">
         <VarsForm
           startingTotal={this.state.startingTotal}
-          stMsg={this.state.stMsg}
+          stErr={this.state.stErr}
           onStartingTotalChange={this.handleStartingTotalChange}
           yearlyContrib={this.state.yearlyContrib}
-          ycMsg={this.state.ycMsg}
+          ycErr={this.state.ycErr}
           onYearlyContribChange={this.handleYearlyContribChange}
           years={this.state.years}
+          yearsErr={this.state.yearsErr}
           onYearsChange={this.handleYearsChange}
           growthRate={this.state.growthRate}
           onGrowthRateChange={this.handleGrowthRateChange}
-          growthRateMsg={this.state.grMsg}
+          growthRateErr={this.state.grErr}
         />
         <Table
           data={data}
@@ -232,18 +232,35 @@ class ICalc extends React.Component {
 }
 
 
-var calcData = function(params) {
+const calcData = function(params) {
   var data = []
-  var total = params.startingTotal
-  var yearlyContrib = Number(params.yearlyContrib)
+  var total = params.stErr ? 0 : Number(params.startingTotal)
+  const yearlyContrib = params.ycErr ? 0 : Number(params.yearlyContrib)
+  const years = params.yearsErr ? 0 : Number(params.years)
+  const growthRate = params.grErr ? 0 : Number(params.growthRate)
   debug('in calcData, params.yearlyContrib: ' + params.yearlyContrib)
   debug('in calcData, yearlyContrib: ' + yearlyContrib)
   debug('in calcData, params.years: ' + params.years)
-  for (var i = 0; i <= params.years; i++) {
+
+  for (var i = 0; i <= years; i++) {
     data.push([i, total])
-    total = total * (1 + params.growthRate) + yearlyContrib
+    total = (total * (1 + growthRate)) + yearlyContrib
   }
   return data
+}
+
+
+//
+// Formats a number string with commas.
+//
+const commaFmt = function(s) {
+  // The Complicated, manual way to do it.
+  //return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+
+  // The easier, built‐in way.
+  //
+  // toLocaleString is a method of the Number class. Make sure we have a Number.
+  return Number(s).toLocaleString('en', {minimumFractionDigits: 2, maximumFractionDigits: 2})
 }
 
 
