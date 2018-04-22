@@ -22,6 +22,20 @@ var Row = function(props) {
 }
 
 
+//
+// Formats a number string with commas.
+//
+const commaFmt = function(s) {
+  // The Complicated, manual way to do it.
+  //return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+
+  // The easier, built‐in way.
+  //
+  // toLocaleString is a method of the Number class. Make sure we have a Number.
+  return Number(s).toLocaleString('en', {minimumFractionDigits: 2, maximumFractionDigits: 2})
+}
+
+
 class Table extends React.Component {
   render() {
 
@@ -130,6 +144,7 @@ class ICalc extends React.Component {
   constructor(props) {
     super(props)
 
+    this.handleNumberChange = this.handleNumberChange.bind(this)
     this.handleStartingTotalChange = this.handleStartingTotalChange.bind(this)
     this.handleYearlyContribChange = this.handleYearlyContribChange.bind(this)
     this.handleYearsChange = this.handleYearsChange.bind(this)
@@ -149,60 +164,36 @@ class ICalc extends React.Component {
     }
   }
 
-  handleStartingTotalChange(input) {
+  handleNumberChange(input, numField, errField) {
     this.setState((prevState, props) => {
       // Check the input
       var err = ''
       if ( ! input ) { err = 'Please enter a number.' }
       if (Number.isNaN(Number(input))) { err = 'Please enter a number.' }
 
-      return { startingTotal: input, stErr: err }
+      //return { startingTotal: input, stErr: err }
+
+      var update = {}
+      update[numField] = input
+      update[errField] = err
+      return update
     })
+  }
+
+  handleStartingTotalChange(input) {
+    return this.handleNumberChange(input, 'startingTotal', 'stErr')
   }
 
   handleYearlyContribChange(input) {
-    this.setState((prevState, props) => {
-      // Check the input
-      var err = ''
-      if ( ! input ) { err = 'Please enter a number.' }
-      if (Number.isNaN(Number(input))) { err = 'Please enter a number.' }
-
-      return { yearlyContrib: input, ycErr: err }
-    })
+    return this.handleNumberChange(input, 'yearlyContrib', 'ycErr')
   }
 
   handleYearsChange(input) {
-    this.setState((prevState, props) => {
-      // Check the input
-      var err = ''
-      if ( ! input ) { err = 'Please enter a number.' }
-      if (Number.isNaN(Number(input))) { err = 'Please enter a number.' }
-
-      return { years: input, yearsErr: err }
-    })
+    return this.handleNumberChange(input, 'years', 'yearsErr')
   }
 
   handleGrowthRateChange(input) {
-    this.setState((prevState, props) => {
-      // Scrub the input
-      //var badNum = false
-      //if ( ! rate ) { badNum = true }
-      //if (Number.isNaN(Number(rate))) { badNum = true }
-
-      //if ( badNum ) {
-        //return { growthRate: prevState.growthRate, grErr: 'Please enter a number.' }
-      //} else {
-        //return { growthRate: rate, grErr: '' }
-      //}
-
-      // Check the input
-      var err = ''
-      if ( ! input ) { err = 'Please enter a number.' }
-      if (Number.isNaN(Number(input))) { err = 'Please enter a number.' }
-
-      return { growthRate: input, grErr: err }
-
-    })
+    return this.handleNumberChange(input, 'growthRate', 'grErr')
   }
 
   render() {
@@ -247,20 +238,6 @@ const calcData = function(params) {
     total = (total * (1 + growthRate)) + yearlyContrib
   }
   return data
-}
-
-
-//
-// Formats a number string with commas.
-//
-const commaFmt = function(s) {
-  // The Complicated, manual way to do it.
-  //return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-
-  // The easier, built‐in way.
-  //
-  // toLocaleString is a method of the Number class. Make sure we have a Number.
-  return Number(s).toLocaleString('en', {minimumFractionDigits: 2, maximumFractionDigits: 2})
 }
 
 
