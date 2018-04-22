@@ -3,10 +3,12 @@ import ReactDOM from 'react-dom'
 
 
 // Set this to true to enable debugging output.
-const enableDebug = true
+const enableDebug = false
 
-const debug = function(msg) {
-  if ( enableDebug === true ) {
+const debug = function(msg)
+{
+  if ( enableDebug === true )
+  {
     console.log(msg)
   }
 }
@@ -49,6 +51,10 @@ class Table extends React.Component {
       <div className="financial-results">
         <table>
           <thead>
+            <tr>
+              <th colSpan="2">Absolute Totals</th>
+              <th colSpan="2">Inflation Adjusted</th>
+            </tr>
             <tr>
               <th>Year</th>
               <th>Total</th>
@@ -149,6 +155,7 @@ class ICalc extends React.Component {
     this.handleYearlyContribChange = this.handleYearlyContribChange.bind(this)
     this.handleYearsChange = this.handleYearsChange.bind(this)
     this.handleGrowthRateChange = this.handleGrowthRateChange.bind(this)
+    this.handleInflationRateChange = this.handleInflationRateChange.bind(this)
 
     this.state = {
       startingTotal: 0.00,
@@ -157,6 +164,7 @@ class ICalc extends React.Component {
       grErr: '',
       spendingRate: 0.035,
       inflationRate: 0.03,
+      irErr: '',
       yearlyContrib: 30000.00,
       ycErr: '',
       years: 20,
@@ -196,6 +204,10 @@ class ICalc extends React.Component {
     return this.handleNumberChange(input, 'growthRate', 'grErr')
   }
 
+  handleInflationRateChange(input) {
+    return this.handleNumberChange(input, 'inflationRate', 'irErr')
+  }
+
   render() {
     var data = calcData(this.state)
     return (
@@ -213,6 +225,9 @@ class ICalc extends React.Component {
           growthRate={this.state.growthRate}
           onGrowthRateChange={this.handleGrowthRateChange}
           growthRateErr={this.state.grErr}
+          inflationRate={this.state.inflationRate}
+          oninflationRateChange={this.handleInflationRateChange}
+         inflationRateErr={this.state.irErr}
         />
         <Table
           data={data}
@@ -229,6 +244,7 @@ const calcData = function(params) {
   const yearlyContrib = params.ycErr ? 0 : Number(params.yearlyContrib)
   const years = params.yearsErr ? 0 : Number(params.years)
   const growthRate = params.grErr ? 0 : Number(params.growthRate)
+  const inflationRate = params.irErr ? 0 : Number(params.inflationRate)
   debug('in calcData, params.yearlyContrib: ' + params.yearlyContrib)
   debug('in calcData, yearlyContrib: ' + yearlyContrib)
   debug('in calcData, params.years: ' + params.years)
