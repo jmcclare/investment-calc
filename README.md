@@ -50,9 +50,9 @@ import ICalc from './investment-calc'
 
 ReactDOM.render(
   <ICalc />,
-  document.getElementById('tic-tac-toe')
+  document.getElementById('react-root')
 )
 ```
 
-In the default site, the investment calculator will show up on the “React
-Sample” page.
+In the default Koa template site, the investment calculator will show up on the
+“React Sample” page.
