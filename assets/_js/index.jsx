@@ -14,7 +14,6 @@ const debug = function(msg)
 }
 
 
-// data.push({year: i, passiveGrowth: passiveGrowth, total: total, spent: spent, iPassiveGrowth: iPassiveGrowth, iTotal: iTotal})
 var Row = function(props)
 {
   return (
@@ -30,9 +29,9 @@ var Row = function(props)
 }
 
 
-//
-// Formats a number string with commas.
-//
+/*
+ * Formats a number string with commas.
+ */
 const commaFmt = function(s)
 {
   // The Complicated, manual way to do it.
@@ -45,8 +44,10 @@ const commaFmt = function(s)
 }
 
 
-class Table extends React.Component {
-  render() {
+class Table extends React.Component
+{
+  render()
+  {
 
     const rows = this.props.data.map(item => {
       return (
@@ -81,33 +82,40 @@ class Table extends React.Component {
 }
 
 
-class NumField extends React.Component {
-  constructor(props) {
+class NumField extends React.Component
+{
+  constructor(props)
+  {
     super(props)
 
     this.handleChange = this.handleChange.bind(this)
   }
 
-  handleChange(e) {
+  handleChange(e)
+  {
     this.props.onChange(e.target.value);
   }
 
-  render() {
+  render()
+  {
     var err = ''
-    if ( this.props.err ) {
+    if ( this.props.err )
+    {
       err = (
-        <span className="error">{' ' + this.props.err}</span>
+        <p className="error">{' ' + this.props.err}</p>
       )
     }
     return (
       <p>
-        <label htmlFor={this.props.varName}>{this.props.label}:</label>
-        <span> </span>
-        <input
-          name={this.props.name}
-          value={this.props.value}
-          onChange={this.handleChange}
-        />
+        <div className="input-line">
+          <label htmlFor={this.props.varName}>{this.props.label}:</label>
+          <span> </span>
+          <input
+            name={this.props.name}
+            value={this.props.value}
+            onChange={this.handleChange}
+          />
+        </div>
         {err}
       </p>
     )
@@ -147,6 +155,13 @@ class VarsForm extends React.Component
           err={this.props.growthRateErr}
         />
         <NumField
+          name="inflationRate"
+          label="Inflation Rate"
+          value={this.props.inflationRate}
+          onChange={this.props.onInflationRateChange}
+          err={this.props.inflationRateErr}
+        />
+        <NumField
           name="spendingRate"
           label="Spending Rate"
           value={this.props.spendingRate}
@@ -165,9 +180,14 @@ class VarsForm extends React.Component
   }
 }
 
+          //inflationRate={this.state.inflationRate}
+          //onInflationRateChange={this.handleInflationRateChange}
+          //inflationRateErr={this.state.irErr}
 
-class ICalc extends React.Component {
-  constructor(props) {
+class ICalc extends React.Component
+{
+  constructor(props)
+  {
     super(props)
 
     this.handleNumberChange = this.handleNumberChange.bind(this)
@@ -178,7 +198,8 @@ class ICalc extends React.Component {
     this.handleSpendingRateChange = this.handleSpendingRateChange.bind(this)
     this.handleInflationRateChange = this.handleInflationRateChange.bind(this)
 
-    this.state = {
+    this.state =
+    {
       startingTotal: 0.00,
       stErr: '',
       growthRate: 0.07,
@@ -194,8 +215,10 @@ class ICalc extends React.Component {
     }
   }
 
-  handleNumberChange(input, numField, errField) {
-    this.setState((prevState, props) => {
+  handleNumberChange(input, numField, errField)
+  {
+    this.setState((prevState, props) =>
+    {
       // Check the input
       var err = ''
       if ( ! input ) { err = 'Please enter a number.' }
@@ -210,27 +233,33 @@ class ICalc extends React.Component {
     })
   }
 
-  handleStartingTotalChange(input) {
+  handleStartingTotalChange(input)
+  {
     return this.handleNumberChange(input, 'startingTotal', 'stErr')
   }
 
-  handleYearlyContribChange(input) {
+  handleYearlyContribChange(input)
+  {
     return this.handleNumberChange(input, 'yearlyContrib', 'ycErr')
   }
 
-  handleYearsChange(input) {
+  handleYearsChange(input)
+  {
     return this.handleNumberChange(input, 'years', 'yearsErr')
   }
 
-  handleGrowthRateChange(input) {
+  handleGrowthRateChange(input)
+  {
     return this.handleNumberChange(input, 'growthRate', 'grErr')
   }
 
-  handleSpendingRateChange(input) {
+  handleSpendingRateChange(input)
+  {
     return this.handleNumberChange(input, 'spendingRate', 'srErr')
   }
 
-  handleInflationRateChange(input) {
+  handleInflationRateChange(input)
+  {
     return this.handleNumberChange(input, 'inflationRate', 'irErr')
   }
 
@@ -252,12 +281,12 @@ class ICalc extends React.Component {
           growthRate={this.state.growthRate}
           onGrowthRateChange={this.handleGrowthRateChange}
           growthRateErr={this.state.grErr}
+          inflationRate={this.state.inflationRate}
+          onInflationRateChange={this.handleInflationRateChange}
+          inflationRateErr={this.state.irErr}
           spendingRate={this.state.spendingRate}
           onSpendingRateChange={this.handleSpendingRateChange}
           spendingRateErr={this.state.srErr}
-          inflationRate={this.state.inflationRate}
-          oninflationRateChange={this.handleInflationRateChange}
-          inflationRateErr={this.state.irErr}
         />
         <Table
           data={data}
@@ -283,16 +312,19 @@ const calcData = function(params)
   debug('in calcData, yearlyContrib: ' + yearlyContrib)
   debug('in calcData, params.years: ' + params.years)
 
-  for (var i = 0; i <= years; i++)
+  data.push({year: 0, passiveGrowth: 0, spent: 0, total: total, iPassiveGrowth: 0, iTotal: iTotal})
+
+  for (var i = 1; i <= years; i++)
   {
-    spent = total * spendingRate
     passiveGrowth = total * growthRate
-    iPassiveGrowth = total * (growthRate - inflationRate)
+    spent = total * spendingRate
+    total = (total * (1 + growthRate - spendingRate)) + yearlyContrib
+    iPassiveGrowth = iTotal * (growthRate - inflationRate)
+    iTotal = total * Math.pow((1 - inflationRate), i)
 
     data.push({year: i, passiveGrowth: passiveGrowth, spent: spent, total: total, iPassiveGrowth: iPassiveGrowth, iTotal: iTotal})
 
-    total = (total * (1 + growthRate - spendingRate)) + yearlyContrib
-    iTotal = iTotal * (1 + growthRate - inflationRate - spendingRate) + yearlyContrib
+    //iTotal = iTotal * (1 + growthRate - inflationRate - spendingRate) + yearlyContrib
   }
   return data
 }
