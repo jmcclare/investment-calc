@@ -54,5 +54,5 @@ ReactDOM.render(
 )
 ```
 
-In the default Koa template site, the investment calculator will show up on the
+In the default Koa template site the investment calculator will show up on the
 “React Sample” page.
