@@ -14,11 +14,17 @@ const debug = function(msg)
 }
 
 
-var Row = function(props) {
+// data.push({year: i, passiveGrowth: passiveGrowth, total: total, spent: spent, iPassiveGrowth: iPassiveGrowth, iTotal: iTotal})
+var Row = function(props)
+{
   return (
     <tr>
-      <td className="year">{props.item[0]}</td>
-      <td className="total">$ {commaFmt(props.item[1])}</td>
+      <td className="year">{props.item.year}</td>
+      <td className="passiveGrowth">$ {commaFmt(props.item.passiveGrowth)}</td>
+      <td className="spent">$ {commaFmt(props.item.spent)}</td>
+      <td className="total">$ {commaFmt(props.item.total)}</td>
+      <td className="iPassiveGrowth">$ {commaFmt(props.item.iPassiveGrowth)}</td>
+      <td className="iTotal">$ {commaFmt(props.item.iTotal)}</td>
     </tr>
   )
 }
@@ -27,7 +33,8 @@ var Row = function(props) {
 //
 // Formats a number string with commas.
 //
-const commaFmt = function(s) {
+const commaFmt = function(s)
+{
   // The Complicated, manual way to do it.
   //return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 
@@ -43,7 +50,7 @@ class Table extends React.Component {
 
     const rows = this.props.data.map(item => {
       return (
-        <Row key={item[0]} item={item} />
+        <Row key={item.year} item={item} />
       )
     })
 
@@ -52,11 +59,15 @@ class Table extends React.Component {
         <table>
           <thead>
             <tr>
-              <th colSpan="2">Absolute Totals</th>
+              <th colSpan="4">Absolute</th>
               <th colSpan="2">Inflation Adjusted</th>
             </tr>
             <tr>
               <th>Year</th>
+              <th>Passive Growth</th>
+              <th>Spent</th>
+              <th>Total</th>
+              <th>Passive Growth</th>
               <th>Total</th>
             </tr>
           </thead>
@@ -104,8 +115,10 @@ class NumField extends React.Component {
 }
 
 
-class VarsForm extends React.Component {
-  constructor(props) {
+class VarsForm extends React.Component
+{
+  constructor(props)
+  {
     super(props)
   }
 
@@ -134,6 +147,13 @@ class VarsForm extends React.Component {
           err={this.props.growthRateErr}
         />
         <NumField
+          name="spendingRate"
+          label="Spending Rate"
+          value={this.props.spendingRate}
+          onChange={this.props.onSpendingRateChange}
+          err={this.props.spendingRateErr}
+        />
+        <NumField
           name="years"
           label="Years"
           value={this.props.years}
@@ -155,6 +175,7 @@ class ICalc extends React.Component {
     this.handleYearlyContribChange = this.handleYearlyContribChange.bind(this)
     this.handleYearsChange = this.handleYearsChange.bind(this)
     this.handleGrowthRateChange = this.handleGrowthRateChange.bind(this)
+    this.handleSpendingRateChange = this.handleSpendingRateChange.bind(this)
     this.handleInflationRateChange = this.handleInflationRateChange.bind(this)
 
     this.state = {
@@ -162,7 +183,8 @@ class ICalc extends React.Component {
       stErr: '',
       growthRate: 0.07,
       grErr: '',
-      spendingRate: 0.035,
+      spendingRate: 0.0,
+      srErr: '',
       inflationRate: 0.03,
       irErr: '',
       yearlyContrib: 30000.00,
@@ -204,11 +226,16 @@ class ICalc extends React.Component {
     return this.handleNumberChange(input, 'growthRate', 'grErr')
   }
 
+  handleSpendingRateChange(input) {
+    return this.handleNumberChange(input, 'spendingRate', 'srErr')
+  }
+
   handleInflationRateChange(input) {
     return this.handleNumberChange(input, 'inflationRate', 'irErr')
   }
 
-  render() {
+  render()
+  {
     var data = calcData(this.state)
     return (
       <div className="icalc">
@@ -225,9 +252,12 @@ class ICalc extends React.Component {
           growthRate={this.state.growthRate}
           onGrowthRateChange={this.handleGrowthRateChange}
           growthRateErr={this.state.grErr}
+          spendingRate={this.state.spendingRate}
+          onSpendingRateChange={this.handleSpendingRateChange}
+          spendingRateErr={this.state.srErr}
           inflationRate={this.state.inflationRate}
           oninflationRateChange={this.handleInflationRateChange}
-         inflationRateErr={this.state.irErr}
+          inflationRateErr={this.state.irErr}
         />
         <Table
           data={data}
@@ -238,20 +268,31 @@ class ICalc extends React.Component {
 }
 
 
-const calcData = function(params) {
+const calcData = function(params)
+{
   var data = []
   var total = params.stErr ? 0 : Number(params.startingTotal)
+  var iTotal = params.stErr ? 0 : Number(params.startingTotal)
+  var spent, passiveGrowth, iPassiveGrowth
   const yearlyContrib = params.ycErr ? 0 : Number(params.yearlyContrib)
   const years = params.yearsErr ? 0 : Number(params.years)
   const growthRate = params.grErr ? 0 : Number(params.growthRate)
+  const spendingRate = params.srErr ? 0 : Number(params.spendingRate)
   const inflationRate = params.irErr ? 0 : Number(params.inflationRate)
   debug('in calcData, params.yearlyContrib: ' + params.yearlyContrib)
   debug('in calcData, yearlyContrib: ' + yearlyContrib)
   debug('in calcData, params.years: ' + params.years)
 
-  for (var i = 0; i <= years; i++) {
-    data.push([i, total])
-    total = (total * (1 + growthRate)) + yearlyContrib
+  for (var i = 0; i <= years; i++)
+  {
+    spent = total * spendingRate
+    passiveGrowth = total * growthRate
+    iPassiveGrowth = total * (growthRate - inflationRate)
+
+    data.push({year: i, passiveGrowth: passiveGrowth, spent: spent, total: total, iPassiveGrowth: iPassiveGrowth, iTotal: iTotal})
+
+    total = (total * (1 + growthRate - spendingRate)) + yearlyContrib
+    iTotal = iTotal * (1 + growthRate - inflationRate - spendingRate) + yearlyContrib
   }
   return data
 }
