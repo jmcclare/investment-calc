@@ -6,6 +6,8 @@ The app is a site module that works in my [Node.js Koa site
 template](https://github.com/jmcclare/koa-template). It can also work in any
 project setup to compile [JSX](https://reactjs.org/docs/introducing-jsx.html).
 
+[See it live](http://jmcclare.com/software/investment-calc).
+
 
 ## Installation ##
 
